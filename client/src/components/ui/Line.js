@@ -10,18 +10,16 @@ import PropTypes from 'prop-types';
 import './Line.css';
 
 /* todo: check mobile version */
-/* todo: fix margin of empty graph */
 const Line = ({
     data, color = 'black', width = 275, height = 64,
 }) => {
     const interval = useSelector((state) => state.stats.interval);
 
     return <NivoLine
-        enableArea={/* todo: fix error when set to true */ false}
+        enableArea
         animate
         enableSlices="x"
         curve="linear"
-        debugMesh
         width={width}
         height={height}
         colors={[color]}
@@ -29,7 +27,6 @@ const Line = ({
         theme={{
             crosshair: {
                 line: {
-                    /* todo: make solid */
                     stroke: 'black',
                     strokeWidth: 1,
                     strokeOpacity: 0.35,
@@ -41,7 +38,7 @@ const Line = ({
             min: 0,
             max: 'auto',
         }}
-        crosshairType={'x'}
+        crosshairType="x"
         axisLeft={false}
         axisBottom={false}
         enableGridX={false}
@@ -58,7 +55,6 @@ const Line = ({
         }}
         sliceTooltip={(slice) => {
             const { xFormatted, yFormatted } = slice.slice.points[0].data;
-            /* todo: check styles */
             return <div className="line__tooltip">
                 <span className="line__tooltip-text">
                     <strong>{yFormatted}</strong>

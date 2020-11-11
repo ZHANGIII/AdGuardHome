@@ -101,10 +101,9 @@ export const normalizeLogs = (logs) => logs.map((log) => {
     };
 });
 
-/* todo: simplify pipeline */
 export const normalizeHistory = (history) => history.map((item, idx) => ({
     x: idx,
-    y: round(item, 2),
+    y: item,
 }));
 
 export const normalizeTopStats = (stats) => (

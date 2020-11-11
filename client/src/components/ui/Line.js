@@ -5,6 +5,7 @@ import addHours from 'date-fns/add_hours';
 import subDays from 'date-fns/sub_days';
 import subHours from 'date-fns/sub_hours';
 import dateFormat from 'date-fns/format';
+import round from 'lodash/round';
 import { useSelector } from 'react-redux';
 import PropTypes from 'prop-types';
 import './Line.css';
@@ -41,15 +42,16 @@ const Line = ({
         enableGridX={false}
         enableGridY={false}
         enablePoints={false}
-        xFormat={(index) => {
+        xFormat={(x) => {
             if (interval === 1 || interval === 7) {
                 const hoursAgo = subHours(Date.now(), 24 * interval);
-                return dateFormat(addHours(hoursAgo, index), 'D MMM HH:00');
+                return dateFormat(addHours(hoursAgo, x), 'D MMM HH:00');
             }
 
             const daysAgo = subDays(Date.now(), interval - 1);
-            return dateFormat(addDays(daysAgo, index), 'D MMM YYYY');
+            return dateFormat(addDays(daysAgo, x), 'D MMM YYYY');
         }}
+        yFormat={(y) => round(y, 2)}
         sliceTooltip={(slice) => {
             const { xFormatted, yFormatted } = slice.slice.points[0].data;
             return <div className="line__tooltip">

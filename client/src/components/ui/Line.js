@@ -1,5 +1,5 @@
 import React from 'react';
-import { Line as NivoLine } from '@nivo/line';
+import { ResponsiveLine } from '@nivo/line';
 import addDays from 'date-fns/add_days';
 import addHours from 'date-fns/add_hours';
 import subDays from 'date-fns/sub_days';
@@ -9,19 +9,16 @@ import { useSelector } from 'react-redux';
 import PropTypes from 'prop-types';
 import './Line.css';
 
-/* todo: check mobile version */
 const Line = ({
-    data, color = 'black', width = 275, height = 64,
+    data, color = 'black',
 }) => {
     const interval = useSelector((state) => state.stats.interval);
 
-    return <NivoLine
+    return <ResponsiveLine
         enableArea
         animate
         enableSlices="x"
         curve="linear"
-        width={width}
-        height={height}
         colors={[color]}
         data={data}
         theme={{

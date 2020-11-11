@@ -11,6 +11,6 @@
     font-size: 0.7rem;
 }
 
-.card-chart-bg path[d="M0,32L12,32L24,32L36,32L48,32L60,32L72,32L84,32L96,32L108,32L120,32L132,32L143,32L155,32L167,32L179,32L191,32L203,32L215,32L227,32L239,32L251,32L263,32L275,32"] {
+.card-chart-bg path[d^="M0,32"] {
     transform: translateY(31px);
 }

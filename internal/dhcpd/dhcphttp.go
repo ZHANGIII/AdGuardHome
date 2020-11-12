@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/AdguardTeam/AdGuardHome/internal/util"
-
 	"github.com/AdguardTeam/golibs/jsonutil"
 	"github.com/AdguardTeam/golibs/log"
 )
@@ -499,11 +498,50 @@ func (s *Server) handleReset(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) registerHandlers() {
-	s.conf.HTTPRegister("GET", "/control/dhcp/status", s.handleDHCPStatus)
-	s.conf.HTTPRegister("GET", "/control/dhcp/interfaces", s.handleDHCPInterfaces)
-	s.conf.HTTPRegister("POST", "/control/dhcp/set_config", s.handleDHCPSetConfig)
-	s.conf.HTTPRegister("POST", "/control/dhcp/find_active_dhcp", s.handleDHCPFindActiveServer)
-	s.conf.HTTPRegister("POST", "/control/dhcp/add_static_lease", s.handleDHCPAddStaticLease)
-	s.conf.HTTPRegister("POST", "/control/dhcp/remove_static_lease", s.handleDHCPRemoveStaticLease)
-	s.conf.HTTPRegister("POST", "/control/dhcp/reset", s.handleReset)
+	s.conf.HTTPRegister(http.MethodGet, "/control/dhcp/status", s.handleDHCPStatus)
+	s.conf.HTTPRegister(http.MethodGet, "/control/dhcp/interfaces", s.handleDHCPInterfaces)
+	s.conf.HTTPRegister(http.MethodPost, "/control/dhcp/set_config", s.handleDHCPSetConfig)
+	s.conf.HTTPRegister(http.MethodPost, "/control/dhcp/find_active_dhcp", s.handleDHCPFindActiveServer)
+	s.conf.HTTPRegister(http.MethodPost, "/control/dhcp/add_static_lease", s.handleDHCPAddStaticLease)
+	s.conf.HTTPRegister(http.MethodPost, "/control/dhcp/remove_static_lease", s.handleDHCPRemoveStaticLease)
+	s.conf.HTTPRegister(http.MethodPost, "/control/dhcp/reset", s.handleReset)
+}
+
+// jsonError is a generic JSON error response.
+type jsonError struct {
+	// Message is the error message, an opaque string.
+	Message string `json:"message"`
+}
+
+// notImplemented returns a handler that replies to any request with an HTTP 501
+// Not Implemented status and a JSON error with the provided message msg.
+//
+// TODO(a.garipov): Either take the logger from the server after we've
+// refactored logging or make this not a method of *Server.
+func (s *Server) notImplemented(msg string) (f func(http.ResponseWriter, *http.Request)) {
+	return func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusNotImplemented)
+
+		err := json.NewEncoder(w).Encode(&jsonError{
+			Message: msg,
+		})
+		if err != nil {
+			log.Debug("writing 501 json response: %s", err)
+		}
+	}
+}
+
+type registerer = func(string, string, func(http.ResponseWriter, *http.Request))
+
+func (s *Server) registerNotImplementedHandlers(reg registerer) {
+	h := s.notImplemented("dhcp is not supported on windows")
+
+	reg(http.MethodGet, "/control/dhcp/status", h)
+	reg(http.MethodGet, "/control/dhcp/interfaces", h)
+	reg(http.MethodPost, "/control/dhcp/set_config", h)
+	reg(http.MethodPost, "/control/dhcp/find_active_dhcp", h)
+	reg(http.MethodPost, "/control/dhcp/add_static_lease", h)
+	reg(http.MethodPost, "/control/dhcp/remove_static_lease", h)
+	reg(http.MethodPost, "/control/dhcp/reset", h)
 }

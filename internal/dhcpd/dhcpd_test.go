@@ -4,6 +4,8 @@ package dhcpd
 
 import (
 	"bytes"
+	"io/ioutil"
+	"log"
 	"net"
 	"os"
 	"testing"
@@ -11,6 +13,16 @@ import (
 
 	"github.com/stretchr/testify/assert"
 )
+
+func TestMain(m *testing.M) {
+	stdWriter := log.Writer()
+	defer func() {
+		log.SetOutput(stdWriter)
+	}()
+	log.SetOutput(ioutil.Discard)
+
+	os.Exit(m.Run())
+}
 
 func testNotify(flags uint32) {
 }

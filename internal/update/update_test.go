@@ -3,6 +3,7 @@ package update
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net"
 	"net/http"
 	"os"
@@ -10,6 +11,16 @@ import (
 
 	"github.com/stretchr/testify/assert"
 )
+
+func TestMain(m *testing.M) {
+	stdWriter := log.Writer()
+	defer func() {
+		log.SetOutput(stdWriter)
+	}()
+	log.SetOutput(ioutil.Discard)
+
+	os.Exit(m.Run())
+}
 
 func startHTTPServer(data string) (net.Listener, uint16) {
 	mux := http.NewServeMux()

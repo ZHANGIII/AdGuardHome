@@ -2,6 +2,8 @@ package stats
 
 import (
 	"fmt"
+	"io/ioutil"
+	"log"
 	"net"
 	"os"
 	"sync/atomic"
@@ -9,6 +11,16 @@ import (
 
 	"github.com/stretchr/testify/assert"
 )
+
+func TestMain(m *testing.M) {
+	stdWriter := log.Writer()
+	defer func() {
+		log.SetOutput(stdWriter)
+	}()
+	log.SetOutput(ioutil.Discard)
+
+	os.Exit(m.Run())
+}
 
 func UIntArrayEquals(a, b []uint64) bool {
 	if len(a) != len(b) {

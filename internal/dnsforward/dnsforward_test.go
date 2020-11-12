@@ -10,6 +10,7 @@ import (
 	"encoding/pem"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"math/big"
 	"net"
 	"os"
@@ -27,6 +28,16 @@ import (
 	"github.com/miekg/dns"
 	"github.com/stretchr/testify/assert"
 )
+
+func TestMain(m *testing.M) {
+	stdWriter := log.Writer()
+	defer func() {
+		log.SetOutput(stdWriter)
+	}()
+	log.SetOutput(ioutil.Discard)
+
+	os.Exit(m.Run())
+}
 
 const (
 	tlsServerName     = "testdns.adguard.com"

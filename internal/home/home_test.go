@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/base64"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -17,6 +18,16 @@ import (
 	"github.com/miekg/dns"
 	"github.com/stretchr/testify/assert"
 )
+
+func TestMain(m *testing.M) {
+	stdWriter := log.Writer()
+	defer func() {
+		log.SetOutput(stdWriter)
+	}()
+	log.SetOutput(ioutil.Discard)
+
+	os.Exit(m.Run())
+}
 
 const yamlConf = `bind_host: 127.0.0.1
 bind_port: 3000

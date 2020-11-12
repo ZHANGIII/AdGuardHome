@@ -1,6 +1,8 @@
 package querylog
 
 import (
+	"io/ioutil"
+	"log"
 	"net"
 	"os"
 	"testing"
@@ -11,6 +13,16 @@ import (
 	"github.com/miekg/dns"
 	"github.com/stretchr/testify/assert"
 )
+
+func TestMain(m *testing.M) {
+	stdWriter := log.Writer()
+	defer func() {
+		log.SetOutput(stdWriter)
+	}()
+	log.SetOutput(ioutil.Discard)
+
+	os.Exit(m.Run())
+}
 
 func prepareTestDir() string {
 	const dir = "./agh-test"

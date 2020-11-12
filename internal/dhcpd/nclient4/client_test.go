@@ -12,7 +12,10 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io/ioutil"
+	"log"
 	"net"
+	"os"
 	"sync"
 	"testing"
 	"time"
@@ -21,6 +24,16 @@ import (
 	"github.com/insomniacslk/dhcp/dhcpv4"
 	"github.com/insomniacslk/dhcp/dhcpv4/server4"
 )
+
+func TestMain(m *testing.M) {
+	stdWriter := log.Writer()
+	defer func() {
+		log.SetOutput(stdWriter)
+	}()
+	log.SetOutput(ioutil.Discard)
+
+	os.Exit(m.Run())
+}
 
 type handler struct {
 	mu       sync.Mutex

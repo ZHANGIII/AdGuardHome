@@ -12,5 +12,5 @@
 }
 
 .card-chart-bg path[d^="M0,32"] {
-    transform: translateY(31px);
+    transform: translateY(32px);
 }

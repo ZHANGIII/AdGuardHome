@@ -106,8 +106,11 @@ func TestSafeBrowsingCache(t *testing.T) {
 	assert.Equal(t, 0, c.getCached())
 }
 
-type testErrUpstream int
+// testErrUpstream implements upstream.Upstream interface for replacing real
+// upstream in tests.
+type testErrUpstream struct{}
 
+// Exchange always returns nil Msg and non-nil error.
 func (teu *testErrUpstream) Exchange(*dns.Msg) (*dns.Msg, error) {
 	return nil, fmt.Errorf("bad")
 }
@@ -120,12 +123,14 @@ func TestSBPC_checkErrorUpstream(t *testing.T) {
 	d := NewForTest(&Config{SafeBrowsingEnabled: true}, nil)
 	defer d.Close()
 
-	ups := new(testErrUpstream)
+	ups := &testErrUpstream{}
 
 	d.safeBrowsingUpstream = ups
 	d.parentalUpstream = ups
+
 	_, err := d.checkSafeBrowsing("smthng.com")
 	assert.NotNil(t, err)
+
 	_, err = d.checkParental("smthng.com")
 	assert.NotNil(t, err)
 }

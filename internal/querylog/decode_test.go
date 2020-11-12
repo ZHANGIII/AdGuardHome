@@ -15,11 +15,15 @@ import (
 
 func TestDecode_decodeQueryLog(t *testing.T) {
 	stdWriter := log.Writer()
+	stdLevel := aglog.GetLevel()
 	t.Cleanup(func() {
 		log.SetOutput(stdWriter)
+		aglog.SetLevel(stdLevel)
 	})
+
 	logOut := &bytes.Buffer{}
 	log.SetOutput(logOut)
+
 	aglog.SetLevel(aglog.DEBUG)
 
 	strBytes := &bytes.Buffer{}

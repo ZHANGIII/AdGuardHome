@@ -756,6 +756,7 @@ func createTestServer(t *testing.T) *Server {
 	s.conf.TCPListenAddr = &net.TCPAddr{Port: 0}
 	s.conf.UpstreamDNS = []string{"8.8.8.8:53", "8.8.4.4:53"}
 	s.conf.FilteringConfig.ProtectionEnabled = true
+	s.conf.ConfigModified = func() {}
 	err := s.Prepare(nil)
 	assert.True(t, err == nil)
 	return s

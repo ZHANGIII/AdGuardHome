@@ -77,6 +77,9 @@ func decodeLogEntry(ent *logEntry, str string) {
 			if err != nil {
 				break
 			}
+			if len(q.Question) == 0 {
+				break
+			}
 			ent.QHost = q.Question[0].Name
 			if len(ent.QHost) == 0 {
 				break

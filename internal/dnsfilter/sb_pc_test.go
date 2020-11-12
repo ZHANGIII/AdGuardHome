@@ -2,10 +2,12 @@ package dnsfilter
 
 import (
 	"crypto/sha256"
+	"fmt"
 	"strings"
 	"testing"
 
 	"github.com/AdguardTeam/golibs/cache"
+	"github.com/miekg/dns"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -88,4 +90,42 @@ func TestSafeBrowsingCache(t *testing.T) {
 	hash = sha256.Sum256([]byte("nonexisting.com"))
 	_, ok = c.hashToHost[hash]
 	assert.True(t, ok)
+
+	c = &sbCtx{
+		svc:       "SafeBrowsing",
+		cacheTime: 100,
+	}
+	conf = cache.Config{}
+	c.cache = cache.New(conf)
+
+	hash = sha256.Sum256([]byte("sub.host.com"))
+	c.hashToHost = make(map[[32]byte]string)
+	c.hashToHost[hash] = "sub.host.com"
+
+	c.cache.Set(hash[0:2], []byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})
+	assert.Equal(t, 0, c.getCached())
+}
+
+type testErrUpstream int
+
+func (teu *testErrUpstream) Exchange(*dns.Msg) (*dns.Msg, error) {
+	return nil, fmt.Errorf("bad")
+}
+
+func (teu *testErrUpstream) Address() string {
+	return ""
+}
+
+func TestSBPC_checkErrorUpstream(t *testing.T) {
+	d := NewForTest(&Config{SafeBrowsingEnabled: true}, nil)
+	defer d.Close()
+
+	ups := new(testErrUpstream)
+
+	d.safeBrowsingUpstream = ups
+	d.parentalUpstream = ups
+	_, err := d.checkSafeBrowsing("smthng.com")
+	assert.NotNil(t, err)
+	_, err = d.checkParental("smthng.com")
+	assert.NotNil(t, err)
 }

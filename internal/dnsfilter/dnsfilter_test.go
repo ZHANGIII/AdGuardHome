@@ -1,10 +1,14 @@
 package dnsfilter
 
 import (
+	"bytes"
 	"fmt"
+	"log"
 	"net"
+	"strings"
 	"testing"
 
+	aglog "github.com/AdguardTeam/golibs/log"
 	"github.com/AdguardTeam/urlfilter/rules"
 	"github.com/miekg/dns"
 	"github.com/stretchr/testify/assert"
@@ -137,10 +141,24 @@ func TestEtcHostsMatching(t *testing.T) {
 // SAFE BROWSING
 
 func TestSafeBrowsing(t *testing.T) {
+	stdWriter := log.Writer()
+	stdLevel := aglog.GetLevel()
+	t.Cleanup(func() {
+		log.SetOutput(stdWriter)
+		aglog.SetLevel(stdLevel)
+	})
+
+	aglog.SetLevel(aglog.DEBUG)
+	logOutput := &bytes.Buffer{}
+	log.SetOutput(logOutput)
+
 	d := NewForTest(&Config{SafeBrowsingEnabled: true}, nil)
 	defer d.Close()
 	gctx.stats.Safebrowsing.Requests = 0
 	d.checkMatch(t, "wmconvirus.narod.ru")
+
+	assert.True(t, strings.Contains(logOutput.String(), "SafeBrowsing lookup for wmconvirus.narod.ru"))
+
 	d.checkMatch(t, "test.wmconvirus.narod.ru")
 	d.checkMatchEmpty(t, "yandex.ru")
 	d.checkMatchEmpty(t, "pornhub.com")
@@ -324,9 +342,21 @@ func TestSafeSearchCacheGoogle(t *testing.T) {
 // PARENTAL
 
 func TestParentalControl(t *testing.T) {
+	stdWriter := log.Writer()
+	stdLevel := aglog.GetLevel()
+	t.Cleanup(func() {
+		log.SetOutput(stdWriter)
+		aglog.SetLevel(stdLevel)
+	})
+
+	aglog.SetLevel(aglog.DEBUG)
+	logOutput := &bytes.Buffer{}
+	log.SetOutput(logOutput)
+
 	d := NewForTest(&Config{ParentalEnabled: true}, nil)
 	defer d.Close()
 	d.checkMatch(t, "pornhub.com")
+	assert.True(t, strings.Contains(logOutput.String(), "Parental lookup for pornhub.com"))
 	d.checkMatch(t, "www.pornhub.com")
 	d.checkMatchEmpty(t, "www.yandex.ru")
 	d.checkMatchEmpty(t, "yandex.ru")
